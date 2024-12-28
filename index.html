@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPC vs Character Battle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            display: inline-block;
+            padding: 10px 15px;
+            border: none;
+            background: #007BFF;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NPC vs Character Battle</h1>
+        <form id="battleForm">
+            <div class="input-group">
+                <label for="action">Choose Action (1: Attack, 2: Defense):</label>
+                <input type="number" id="action" name="action" min="1" max="2" required>
+            </div>
+            <div class="input-group">
+                <label for="npcStats">NPC Stats (Strength, Agility, Spirit, Luck):</label>
+                <input type="text" id="npcStats" name="npcStats" placeholder="e.g., 5 4 3 2" required>
+            </div>
+            <div class="input-group">
+                <label for="charStats">Character Stats (Strength, Agility, Spirit, Luck):</label>
+                <input type="text" id="charStats" name="charStats" placeholder="e.g., 6 5 4 3" required>
+            </div>
+            <button type="button" onclick="startBattle();">Start Battle</button>
+        </form>
+
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        function adjustStats(stats) {
+            const [strength, agility, spirit, luck] = stats;
+            let adjustedStrength = strength;
+            let adjustedAgility = agility;
+
+            if (spirit === 1) {
+                adjustedStrength *= 0.7;
+                adjustedAgility *= 0.7;
+            } else if (spirit === 2) {
+                adjustedStrength *= 0.8;
+                adjustedAgility *= 0.8;
+            } else if (spirit === 4) {
+                adjustedStrength *= 1.2;
+                adjustedAgility *= 1.2;
+            } else if (spirit === 5) {
+                adjustedStrength *= 1.3;
+                adjustedAgility *= 1.3;
+            }
+
+            return [adjustedStrength, adjustedAgility, spirit, luck];
+        }
+
+        function calculateScore(stats, isDefense) {
+            const [strength, agility, spirit, luck] = stats;
+            return isDefense
+                ? strength * 0.3 + agility * 0.5 + spirit * 0.2 + luck * 0.1
+                : strength * 0.5 + agility * 0.3 + spirit * 0.2 + luck * 0.1;
+        }
+
+        function startBattle() {
+            const action = parseInt(document.getElementById('action').value);
+            const npcStatsInput = document.getElementById('npcStats').value.trim();
+            const charStatsInput = document.getElementById('charStats').value.trim();
+
+            if (!npcStatsInput || !charStatsInput) {
+                alert('스탯 값을 입력하세요.');
+                return;
+            }
+
+            const npcStats = npcStatsInput.split(' ').map(Number);
+            const charStats = charStatsInput.split(' ').map(Number);
+
+            if (npcStats.length !== 4 || charStats.length !== 4 || ![1, 2].includes(action)) {
+                alert('입력이 올바르지 않습니다. 1 또는 2의 액션과 정확한 4개의 스탯 값을 제공하세요.');
+                return;
+            }
+
+            if (npcStats.some(isNaN) || charStats.some(isNaN)) {
+                alert('스탯 값은 숫자여야 합니다.');
+                return;
+            }
+
+            const isDefense = action === 2;
+            const adjustedNpcStats = adjustStats(npcStats);
+            const adjustedCharStats = adjustStats(charStats);
+
+            const npcScore = calculateScore(adjustedNpcStats, isDefense);
+            const charScore = calculateScore(adjustedCharStats, isDefense);
+
+            let resultMessage;
+            if (charScore > npcScore) {
+                resultMessage = 'Character wins!';
+            } else if (npcScore > charScore) {
+                resultMessage = 'NPC wins!';
+            } else {
+                resultMessage = 'It\'s a tie!';
+            }
+
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('result').innerText = resultMessage;
+        }
+    </script>
+</body>
+</html>
